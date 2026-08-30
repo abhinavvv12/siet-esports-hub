@@ -1,0 +1,366 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  COORDINATOR
+  PARTICIPANT
+}
+
+enum EventStatus {
+  DRAFT
+  UPCOMING
+  REGISTRATION_OPEN
+  REGISTRATION_CLOSED
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+enum RegistrationStatus {
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum CertificateStatus {
+  NOT_GENERATED
+  GENERATED
+  REVOKED
+}
+
+enum AnnouncementStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum MatchStatus {
+  SCHEDULED
+  LIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum WinnerPosition {
+  FIRST
+  SECOND
+  THIRD
+  MVP
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  password      String
+  name          String
+  role          Role     @default(PARTICIPANT)
+  profilePhoto  String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  registrations     Registration[]
+  paymentVerifications Payment[] @relation("verifiedBy")
+  approvals         Registration[] @relation("approvedBy")
+  auditLogs         AuditLog[]
+  certificates      Certificate[] @relation("generatedBy")
+
+  @@map("users")
+}
+
+model Tournament {
+  id                    String      @id @default(cuid())
+  name                  String
+  game                  String
+  description           String?
+  bannerImage           String?
+  logo                  String?
+  startDate             DateTime?
+  endDate               DateTime?
+  registrationStart     DateTime?
+  registrationDeadline  DateTime?
+  venue                 String?
+  entryFee              String?
+  maxTeams              Int?
+  teamSize              Int         @default(4)
+  prizePool             String?
+  status                EventStatus @default(DRAFT)
+  registrationOpen      Boolean     @default(false)
+  displayOrder          Int         @default(0)
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+
+  registrations Registration[]
+  stages        TournamentStage[]
+  rules         TournamentRule[]
+  gallery       GalleryImage[]
+  winners       Winner[]
+  announcements Announcement[]
+
+  @@map("tournaments")
+}
+
+model Registration {
+  id               String             @id @default(cuid())
+  registrationCode String             @unique
+  tournamentId     String
+  teamName         String
+  status           RegistrationStatus @default(PENDING_APPROVAL)
+  rejectionReason  String?
+  teamLeaderEmail  String
+  teamLeaderMobile String
+  submittedAt      DateTime           @default(now())
+  approvedAt       DateTime?
+  updatedAt        DateTime           @updatedAt
+
+  approvedById String?
+  approvedBy   User?   @relation("approvedBy", fields: [approvedById], references: [id])
+  submittedById String?
+  submittedBy  User?   @relation(fields: [submittedById], references: [id])
+
+  tournament   Tournament @relation(fields: [tournamentId], references: [id])
+  players      Player[]
+  payment      Payment?
+  certificates Certificate[]
+
+  @@map("registrations")
+}
+
+model Player {
+  id             String  @id @default(cuid())
+  registrationId String
+  playerNumber   Int
+  fullName       String
+  rollNumber     String
+  classSection   String
+  year           String
+  department     String
+  email          String?
+  mobile         String?
+  isLeader       Boolean @default(false)
+
+  registration Registration  @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  certificate  Certificate[]
+
+  @@map("players")
+}
+
+model Payment {
+  id             String        @id @default(cuid())
+  registrationId String        @unique
+  amount         Float?
+  method         String        @default("CASH")
+  status         PaymentStatus @default(PENDING)
+  verifiedById   String?
+  verifiedAt     DateTime?
+  notes          String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  registration Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  verifiedBy   User?        @relation("verifiedBy", fields: [verifiedById], references: [id])
+
+  @@map("payments")
+}
+
+model Certificate {
+  id             String            @id @default(cuid())
+  certificateId  String            @unique
+  registrationId String
+  playerId       String
+  status         CertificateStatus @default(NOT_GENERATED)
+  generatedAt    DateTime?
+  generatedById  String?
+  revokedAt      DateTime?
+  issuedTo       String
+  teamName       String
+  game           String
+  achievement    String            @default("Participation")
+
+  registration Registration @relation(fields: [registrationId], references: [id])
+  player       Player       @relation(fields: [playerId], references: [id])
+  generatedBy  User?        @relation("generatedBy", fields: [generatedById], references: [id])
+
+  @@map("certificates")
+}
+
+model FacultyCoordinator {
+  id           String  @id @default(cuid())
+  name         String
+  designation  String
+  department   String
+  email        String?
+  phone        String?
+  photo        String?
+  displayOrder Int     @default(0)
+  isActive     Boolean @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("faculty_coordinators")
+}
+
+model StudentCoordinator {
+  id           String  @id @default(cuid())
+  name         String
+  department   String
+  year         String
+  role         String?
+  phone        String?
+  email        String?
+  photo        String?
+  displayOrder Int     @default(0)
+  isActive     Boolean @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("student_coordinators")
+}
+
+model TournamentRule {
+  id           String  @id @default(cuid())
+  tournamentId String?
+  ruleNumber   Int
+  content      String
+  isActive     Boolean @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tournament Tournament? @relation(fields: [tournamentId], references: [id])
+
+  @@map("tournament_rules")
+}
+
+model TournamentStage {
+  id           String  @id @default(cuid())
+  tournamentId String
+  name         String
+  order        Int
+  description  String?
+  isActive     Boolean @default(true)
+
+  tournament Tournament @relation(fields: [tournamentId], references: [id])
+  matches    Match[]
+
+  @@map("tournament_stages")
+}
+
+model Match {
+  id              String      @id @default(cuid())
+  stageId         String
+  matchNumber     String
+  scheduledAt     DateTime?
+  venue           String?
+  roomId          String?
+  roomPassword    String?
+  status          MatchStatus @default(SCHEDULED)
+  notes           String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  stage       TournamentStage @relation(fields: [stageId], references: [id])
+  teams       MatchTeam[]
+
+  @@map("matches")
+}
+
+model MatchTeam {
+  id             String @id @default(cuid())
+  matchId        String
+  registrationId String
+  score          Int?
+
+  match Match @relation(fields: [matchId], references: [id])
+
+  @@map("match_teams")
+}
+
+model GalleryImage {
+  id           String   @id @default(cuid())
+  tournamentId String?
+  filename     String
+  url          String
+  title        String?
+  description  String?
+  category     String?
+  isFeatured   Boolean  @default(false)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  tournament Tournament? @relation(fields: [tournamentId], references: [id])
+
+  @@map("gallery_images")
+}
+
+model Winner {
+  id           String         @id @default(cuid())
+  tournamentId String
+  game         String
+  position     WinnerPosition
+  teamName     String
+  players      String[]
+  photo        String?
+  description  String?
+  createdAt    DateTime       @default(now())
+
+  tournament Tournament @relation(fields: [tournamentId], references: [id])
+
+  @@map("winners")
+}
+
+model Announcement {
+  id           String             @id @default(cuid())
+  tournamentId String?
+  title        String
+  description  String
+  image        String?
+  status       AnnouncementStatus @default(DRAFT)
+  publishDate  DateTime?
+  expiryDate   DateTime?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  tournament Tournament? @relation(fields: [tournamentId], references: [id])
+
+  @@map("announcements")
+}
+
+model WebsiteContent {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  type      String   @default("text")
+  updatedAt DateTime @updatedAt
+
+  @@map("website_content")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String
+  action     String
+  entity     String
+  entityId   String?
+  oldValue   Json?
+  newValue   Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}
