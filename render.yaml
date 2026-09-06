@@ -1,0 +1,21 @@
+# Render deployment configuration
+# Place this at the root of your repository
+
+services:
+  - type: web
+    name: siet-esports-backend
+    runtime: node
+    rootDir: server
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npx prisma migrate deploy && node dist/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false   # Set this manually in Render dashboard
+      - key: JWT_SECRET
+        sync: false   # Set this manually in Render dashboard
+      - key: CLIENT_URL
+        value: https://siet-esports-hub.vercel.app  # Update with your Vercel URL
+      - key: PORT
+        value: 4000

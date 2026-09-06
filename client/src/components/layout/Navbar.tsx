@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Gamepad2, ChevronRight } from 'lucide-react';
+import { Menu, X, ChevronRight } from 'lucide-react';
 
 const navLinks = [
   { href: '/#championship', label: 'Championship' },
@@ -48,11 +48,14 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="p-1.5 bg-indigo-600 rounded-lg group-hover:bg-indigo-500 transition-colors">
-              <Gamepad2 className="h-5 w-5 text-white" />
-            </div>
-            <span className="font-display font-bold text-white text-lg tracking-tight">
-              SIET <span className="text-indigo-400">Esports</span>
+            <img
+              src="/logos/esports-logo.png"
+              alt="SIET Esports Club"
+              className="h-9 w-auto object-contain"
+              style={{ filter: 'drop-shadow(0 0 6px rgba(140,60,255,0.4))' }}
+            />
+            <span className="font-display font-bold text-white text-base tracking-tight leading-tight hidden sm:block">
+              SIET <span className="text-purple-400">Esports</span>
             </span>
           </Link>
 

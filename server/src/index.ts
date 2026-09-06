@@ -18,9 +18,22 @@ if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 // Security
 app.use(helmet({ crossOriginEmbedderPolicy: false, contentSecurityPolicy: false }));
 
-// CORS
+// CORS — allow multiple origins (localhost dev + Vercel production)
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  process.env.CLIENT_URL,          // e.g. https://siet-esports-hub.vercel.app
+].filter(Boolean) as string[];
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    // Also allow any *.vercel.app preview deployments
+    if (origin.endsWith('.vercel.app')) return callback(null, true);
+    callback(new Error(`CORS blocked: ${origin}`));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -59,7 +72,8 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
 app.listen(PORT, () => {
   console.log(`\n🚀 SIET Esports Hub Server`);
   console.log(`   Running on: http://localhost:${PORT}`);
-  console.log(`   Environment: ${process.env.NODE_ENV || 'development'}\n`);
+  console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`   Allowed origins: ${allowedOrigins.join(', ')}\n`);
 });
 
 export default app;

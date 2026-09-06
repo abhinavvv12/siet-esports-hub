@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Gamepad2, Mail, Phone, MapPin, ExternalLink } from 'lucide-react';
+import { Mail, Phone, MapPin, ExternalLink } from 'lucide-react';
 
 const quickLinks = [
   { href: '/#championship', label: 'Championship' },
@@ -21,12 +21,15 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Brand */}
           <div className="lg:col-span-2">
-            <Link to="/" className="flex items-center gap-2.5 mb-4">
-              <div className="p-1.5 bg-indigo-600 rounded-lg">
-                <Gamepad2 className="h-5 w-5 text-white" />
-              </div>
+            <Link to="/" className="flex items-center gap-3 mb-4">
+              <img
+                src="/logos/esports-logo.png"
+                alt="SIET Esports Club"
+                className="h-10 w-auto object-contain"
+                style={{ filter: 'drop-shadow(0 0 6px rgba(140,60,255,0.35))' }}
+              />
               <span className="font-display font-bold text-white text-lg">
-                SIET <span className="text-indigo-400">Esports</span>
+                SIET <span className="text-purple-400">Esports</span>
               </span>
             </Link>
             <p className="text-slate-400 text-sm leading-relaxed mb-4 max-w-sm">

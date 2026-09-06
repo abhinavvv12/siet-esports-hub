@@ -89,9 +89,7 @@ export default function CoordinatorLayout({ children, title }: Props) {
       {/* Logo */}
       <div className="p-4 border-b border-slate-800 flex-shrink-0">
         <Link to="/coordinator/dashboard" className="flex items-center gap-2.5">
-          <div className="p-1.5 bg-indigo-600 rounded-lg">
-            <Gamepad2 className="h-4 w-4 text-white" />
-          </div>
+          <img src="/logos/esports-logo.png" alt="SIET Esports" className="h-8 w-auto object-contain" />
           <div>
             <p className="text-white font-display font-bold text-sm leading-tight">SIET Esports</p>
             <p className="text-indigo-400 text-xs">Coordinator Hub</p>

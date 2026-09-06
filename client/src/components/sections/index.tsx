@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Phone, Mail, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { Phone, Mail, ChevronDown, ChevronUp, X, User } from 'lucide-react';
 import { FacultyCoordinator, StudentCoordinator, Rule, GalleryImage, Announcement } from '../../types';
 
 // ─── Road to Finals (Formats) ─────────────────────────────────────
@@ -13,12 +13,13 @@ export function FormatsSection() {
     {
       num: '02',
       title: 'Tournament Structure',
-      desc: 'Matches progress through League Stage → Group Stage → Knockout Stage → Quarter Finals → Semi Finals → Grand Finals.',
+      desc: 'Match format and stages will be determined based on the number of squad registrations.',
+      emphasis: true,
     },
     {
       num: '03',
       title: 'Match Schedule',
-      desc: 'The official match fixtures, brackets, groups and schedule will be announced after registrations close and team registrations are finalized.',
+      desc: 'The match format, fixtures, brackets and schedule will be finalized after registrations close, based on the number of registered squads.',
     },
   ];
 
@@ -34,27 +35,41 @@ export function FormatsSection() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {stages.map((s, i) => (
-            <div key={s.num} className={`card-hover p-6 relative ${i === 1 ? 'md:border-indigo-500/20' : ''}`}>
-              <div className="text-5xl font-display font-black text-indigo-600/20 mb-3">{s.num}</div>
+            <div key={s.num} className={`card-hover p-6 relative ${i === 1 ? 'md:border-purple-500/30' : ''}`}>
+              {/* Section number — WHITE and clearly visible */}
+              <div
+                className="font-display font-black mb-3 leading-none"
+                style={{ fontSize: '3.5rem', color: 'rgba(255,255,255,0.85)' }}
+              >
+                {s.num}
+              </div>
               <h3 className="text-lg font-display font-bold text-white mb-3">{s.title}</h3>
-              <p className="text-slate-400 text-sm leading-relaxed">{s.desc}</p>
+              <p
+                className="text-sm leading-relaxed"
+                style={{
+                  color: s.emphasis ? '#e2e8f0' : '#94a3b8',
+                  fontWeight: s.emphasis ? 600 : 400,
+                }}
+              >
+                {s.desc}
+              </p>
             </div>
           ))}
         </div>
 
-        {/* Stage pipeline visual */}
-        <div className="mt-12 overflow-x-auto">
-          <div className="flex items-center gap-2 min-w-max mx-auto justify-center py-4">
-            {['Registration', 'League Stage', 'Knockout Stage', 'Quarter Finals', 'Semi Finals', 'Grand Finals'].map((stage, i, arr) => (
+        {/* Stage pipeline — simplified, no fixed stages */}
+        <div className="mt-10 text-center">
+          <div className="inline-flex flex-wrap items-center justify-center gap-2">
+            {['Registration', 'Slot Confirmation', 'Format Decided', 'Fixtures Announced', 'Matches Begin'].map((stage, i, arr) => (
               <div key={stage} className="flex items-center gap-2">
-                <div className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
+                <div className={`px-3 py-1.5 rounded-lg text-xs font-medium border ${
                   i === arr.length - 1
-                    ? 'bg-indigo-600/20 border-indigo-500/40 text-indigo-300'
+                    ? 'bg-purple-600/20 border-purple-500/40 text-purple-300'
                     : 'bg-slate-800/50 border-slate-700/30 text-slate-400'
                 }`}>
                   {stage}
                 </div>
-                {i < arr.length - 1 && <span className="text-indigo-600/40">→</span>}
+                {i < arr.length - 1 && <span className="text-purple-600/40 text-xs">→</span>}
               </div>
             ))}
           </div>
@@ -64,38 +79,119 @@ export function FormatsSection() {
   );
 }
 
+// ─── Glassmorphism Card (shared) ──────────────────────────────────
+function GlassCard({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div
+      className={`relative rounded-2xl overflow-hidden text-center ${className}`}
+      style={{
+        background: 'rgba(30, 10, 60, 0.55)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        border: '1px solid rgba(167,139,250,0.15)',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)',
+      }}
+    >
+      {/* Subtle top glow line */}
+      <div
+        className="absolute top-0 left-0 right-0 h-px"
+        style={{ background: 'linear-gradient(90deg, transparent, rgba(167,139,250,0.4), transparent)' }}
+      />
+      {children}
+    </div>
+  );
+}
+
+// ─── Avatar placeholder ───────────────────────────────────────────
+function AvatarPlaceholder({ name, size = 'md' }: { name: string; size?: 'sm' | 'md' | 'lg' }) {
+  const initial = name?.charAt(0)?.toUpperCase() || '?';
+  const dims = size === 'lg' ? 'w-24 h-24' : size === 'md' ? 'w-20 h-20' : 'w-16 h-16';
+  const fontSize = size === 'lg' ? '2rem' : size === 'md' ? '1.6rem' : '1.2rem';
+  return (
+    <div
+      className={`${dims} rounded-full flex items-center justify-center mx-auto flex-shrink-0`}
+      style={{
+        background: 'linear-gradient(135deg, rgba(109,40,217,0.6), rgba(91,33,182,0.4))',
+        border: '2px solid rgba(167,139,250,0.3)',
+        boxShadow: '0 0 16px rgba(124,58,237,0.25)',
+        fontSize,
+        fontWeight: 700,
+        color: '#c4b5fd',
+        fontFamily: "'Space Grotesk', sans-serif",
+      }}
+    >
+      {initial}
+    </div>
+  );
+}
+
 // ─── Faculty Section ──────────────────────────────────────────────
 export function FacultySection({ coordinators, isLoading }: { coordinators: FacultyCoordinator[]; isLoading: boolean }) {
   return (
     <section id="faculty" className="py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-14">
-          <p className="text-indigo-400 font-mono text-xs uppercase tracking-widest mb-3">Academic Leadership</p>
-          <h2 className="text-4xl font-display font-bold text-white">Faculty <span className="text-gradient">Coordinators</span></h2>
+          <p className="text-purple-400 font-mono text-xs uppercase tracking-widest mb-3">Academic Leadership</p>
+          <h2 className="text-4xl font-display font-bold text-white">
+            Faculty <span className="text-gradient">Coordinators</span>
+          </h2>
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[1,2,3].map(i => <div key={i} className="card p-6 skeleton h-40" />)}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map(i => <div key={i} className="skeleton rounded-2xl h-56" />)}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {coordinators.map((f) => (
-              <div key={f.id} className="card-hover p-6 text-center">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/20 flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl font-display font-bold text-indigo-400">
-                    {f.name.split(' ').pop()?.charAt(0)}
-                  </span>
+              <GlassCard key={f.id} className="p-7">
+                {/* Photo or avatar */}
+                <div className="mb-4">
+                  {f.photo ? (
+                    <img
+                      src={f.photo}
+                      alt={f.name}
+                      className="w-24 h-24 rounded-full object-cover mx-auto"
+                      style={{
+                        border: '2px solid rgba(167,139,250,0.35)',
+                        boxShadow: '0 0 20px rgba(124,58,237,0.3)',
+                      }}
+                    />
+                  ) : (
+                    <AvatarPlaceholder name={f.name} size="lg" />
+                  )}
                 </div>
-                <h3 className="text-lg font-display font-bold text-white mb-1">{f.name}</h3>
-                <p className="text-indigo-400 text-sm font-medium mb-1">{f.designation}</p>
-                <p className="text-slate-500 text-sm">{f.department}</p>
+
+                {/* Name */}
+                <h3 className="text-white font-display font-bold text-lg leading-tight mb-1">
+                  {f.name}
+                </h3>
+
+                {/* Department */}
+                <p className="text-slate-300 text-sm mb-1">{f.department}</p>
+
+                {/* Designation */}
+                <p
+                  className="text-xs font-medium uppercase tracking-wider mb-3"
+                  style={{ color: '#a78bfa' }}
+                >
+                  {f.designation}
+                </p>
+
+                {/* Email */}
                 {f.email && (
-                  <a href={`mailto:${f.email}`} className="flex items-center justify-center gap-1 text-xs text-slate-400 hover:text-indigo-300 mt-3 transition-colors">
-                    <Mail className="h-3 w-3" />{f.email}
+                  <a
+                    href={`mailto:${f.email}`}
+                    className="inline-flex items-center gap-1.5 text-xs transition-colors"
+                    style={{ color: '#94a3b8' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = '#a78bfa')}
+                    onMouseLeave={e => (e.currentTarget.style.color = '#94a3b8')}
+                  >
+                    <Mail className="h-3 w-3" />
+                    {f.email}
                   </a>
                 )}
-              </div>
+              </GlassCard>
             ))}
           </div>
         )}
@@ -108,34 +204,66 @@ export function FacultySection({ coordinators, isLoading }: { coordinators: Facu
 export function StudentsSection({ coordinators, isLoading }: { coordinators: StudentCoordinator[]; isLoading: boolean }) {
   return (
     <section id="students" className="py-20 bg-slate-900/30">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-14">
-          <p className="text-indigo-400 font-mono text-xs uppercase tracking-widest mb-3">Club Management</p>
-          <h2 className="text-4xl font-display font-bold text-white">Student <span className="text-gradient">Coordinators</span></h2>
+          <p className="text-purple-400 font-mono text-xs uppercase tracking-widest mb-3">Club Management</p>
+          <h2 className="text-4xl font-display font-bold text-white">
+            Student <span className="text-gradient">Coordinators</span>
+          </h2>
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
-            {[1,2,3,4].map(i => <div key={i} className="card p-5 skeleton h-36" />)}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="skeleton rounded-2xl h-48" />)}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          /* Desktop: 2-column grid; stacks on mobile */
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             {coordinators.map((s) => (
-              <div key={s.id} className="card-hover p-5 text-center">
-                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border border-purple-500/20 flex items-center justify-center mx-auto mb-3">
-                  <span className="text-xl font-display font-bold text-purple-400">{s.name.charAt(0)}</span>
+              <GlassCard key={s.id} className="p-6">
+                <div className="flex items-center gap-4 text-left">
+                  {/* Photo or avatar */}
+                  <div className="flex-shrink-0">
+                    {s.photo ? (
+                      <img
+                        src={s.photo}
+                        alt={s.name}
+                        className="w-16 h-16 rounded-full object-cover"
+                        style={{
+                          border: '2px solid rgba(167,139,250,0.3)',
+                          boxShadow: '0 0 14px rgba(124,58,237,0.25)',
+                        }}
+                      />
+                    ) : (
+                      <AvatarPlaceholder name={s.name} size="sm" />
+                    )}
+                  </div>
+
+                  {/* Info */}
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-white font-display font-bold text-base leading-tight truncate">
+                      {s.name}
+                    </h3>
+                    <p className="text-slate-300 text-sm mt-0.5">{s.year}</p>
+                    <p className="text-sm mt-0.5" style={{ color: '#a78bfa' }}>
+                      {s.department}
+                      {s.role ? ` · ${s.role}` : ''}
+                    </p>
+                    {s.phone && (
+                      <a
+                        href={`tel:${s.phone.replace(/\s/g, '')}`}
+                        className="inline-flex items-center gap-1.5 mt-2 text-xs font-mono transition-colors"
+                        style={{ color: '#94a3b8' }}
+                        onMouseEnter={e => (e.currentTarget.style.color = '#4ade80')}
+                        onMouseLeave={e => (e.currentTarget.style.color = '#94a3b8')}
+                      >
+                        <Phone className="h-3 w-3" />
+                        {s.phone}
+                      </a>
+                    )}
+                  </div>
                 </div>
-                <h3 className="text-base font-display font-semibold text-white mb-0.5">{s.name}</h3>
-                <p className="text-indigo-400 text-xs font-medium mb-0.5">{s.department}</p>
-                <p className="text-slate-500 text-xs mb-3">{s.year}</p>
-                {s.phone && (
-                  <a href={`tel:${s.phone.replace(/\s/g, '')}`}
-                    className="flex items-center justify-center gap-1.5 text-xs text-slate-400 hover:text-green-400 transition-colors">
-                    <Phone className="h-3 w-3" />
-                    {s.phone}
-                  </a>
-                )}
-              </div>
+              </GlassCard>
             ))}
           </div>
         )}
@@ -172,14 +300,14 @@ export function RulesSection({ rules, isLoading }: { rules: Rule[]; isLoading: b
                       {String(rule.ruleNumber).padStart(2, '0')}
                     </span>
                   </div>
-                  <p className="text-slate-200 text-sm flex-1 leading-relaxed">{rule.content}</p>
+                  <p className="text-white text-sm flex-1 leading-relaxed">{rule.content}</p>
                   <div className="text-slate-500 flex-shrink-0">
                     {expanded === rule.id ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                   </div>
                 </div>
                 {expanded === rule.id && (
                   <div className="px-4 pb-4 pt-0">
-                    <div className="pl-12 text-xs text-slate-500 leading-relaxed border-l-2 border-indigo-500/20 ml-4">
+                    <div className="pl-12 text-xs text-slate-400 leading-relaxed border-l-2 border-indigo-500/20 ml-4">
                       Violation of this rule may result in immediate disqualification from the championship.
                       All decisions by the Faculty Coordinators are final and binding.
                     </div>
@@ -247,7 +375,6 @@ export function GallerySection({ images, isLoading }: { images: GalleryImage[]; 
         )}
       </div>
 
-      {/* Lightbox */}
       {lightbox && (
         <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setLightbox(null)}>
           <button className="absolute top-4 right-4 p-2 text-white hover:bg-white/10 rounded-lg" onClick={() => setLightbox(null)}>
@@ -298,7 +425,7 @@ export function AboutSection({ content }: { content: Record<string, string> }) {
             <h2 className="text-4xl font-display font-bold text-white mb-5">
               {content.about_heading || 'About SIET'}
             </h2>
-            <p className="text-slate-400 leading-relaxed mb-6">
+            <p className="text-slate-300 leading-relaxed mb-6">
               {content.about_description || 'Siddhartha Institute of Engineering & Technology, part of the Siddhartha Group of Institutions established in 1994.'}
             </p>
           </div>
