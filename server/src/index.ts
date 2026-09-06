@@ -18,20 +18,19 @@ if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 // Security
 app.use(helmet({ crossOriginEmbedderPolicy: false, contentSecurityPolicy: false }));
 
-// CORS — allow multiple origins (localhost dev + Vercel production)
-const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:3000',
-  process.env.CLIENT_URL,          // e.g. https://siet-esports-hub.vercel.app
-].filter(Boolean) as string[];
-
+// CORS — allow localhost + any Vercel deployment URL
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, curl, Postman)
+    // Allow requests with no origin (Postman, mobile apps, curl)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    // Also allow any *.vercel.app preview deployments
+    // Allow localhost dev
+    if (origin.includes('localhost')) return callback(null, true);
+    // Allow ALL vercel.app subdomains (covers preview + production URLs)
     if (origin.endsWith('.vercel.app')) return callback(null, true);
+    // Allow custom domain if CLIENT_URL is set
+    if (process.env.CLIENT_URL && origin === process.env.CLIENT_URL) return callback(null, true);
+    // Block everything else
+    console.log(`CORS blocked origin: ${origin}`);
     callback(new Error(`CORS blocked: ${origin}`));
   },
   credentials: true,
@@ -65,15 +64,14 @@ app.use((_req, res) => res.status(404).json({ success: false, message: 'Route no
 
 // Error handler
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error('Unhandled error:', err);
+  console.error('Unhandled error:', err.message);
   res.status(500).json({ success: false, message: 'Internal server error' });
 });
 
 app.listen(PORT, () => {
   console.log(`\n🚀 SIET Esports Hub Server`);
-  console.log(`   Running on: http://localhost:${PORT}`);
-  console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`   Allowed origins: ${allowedOrigins.join(', ')}\n`);
+  console.log(`   Port: ${PORT}`);
+  console.log(`   Environment: ${process.env.NODE_ENV || 'development'}\n`);
 });
 
 export default app;
