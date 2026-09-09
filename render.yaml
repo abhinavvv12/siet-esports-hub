@@ -5,12 +5,21 @@ services:
     rootDir: server
     buildCommand: npm install && npx prisma generate && npm run build
     startCommand: npx prisma migrate deploy && npx ts-node prisma/seed.ts && node dist/index.js
+    healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: siet-esports-db
+          property: connectionString
       - key: JWT_SECRET
-        sync: false
+        generateValue: true
       - key: CLIENT_URL
         value: https://siet-esports-hub.vercel.app
+
+databases:
+  - name: siet-esports-db
+    plan: free
+    databaseName: siet_esports
+    user: siet_esports
