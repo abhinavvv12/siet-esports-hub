@@ -18,6 +18,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Public pages and the login screen do not need a session lookup. Calling
+    // this protected endpoint for every visitor produces an expected 401 that
+    // browsers surface as a console error. Coordinator pages still verify the
+    // server-side session before granting access.
+    const needsSession = window.location.pathname.startsWith('/coordinator/')
+      && window.location.pathname !== '/coordinator/login';
+
+    if (!needsSession) {
+      setUser(null);
+      setIsLoading(false);
+      return;
+    }
+
     api.get('/auth/me')
       .then((r) => setUser(r.data.data))
       .catch(() => setUser(null))

@@ -30,23 +30,18 @@ export default function HeroSection({ content }: { content: HeroContent }) {
       {/* Content */}
       <div className="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-10">
 
-        {/* ── COLLEGE LOGO ── */}
-        <div className="flex justify-center mb-3">
+        {/* The source marks have opaque artwork. A shared masked lockup lets
+            their edges dissolve into the hero instead of presenting two cards. */}
+        <div className="hero-brand-lockup" aria-label="Siddhartha Institute of Engineering and Technology Esports">
           <img
             src="/logos/college-logo.png"
             alt="Siddhartha Group of Institutions"
-            className="w-24 h-auto sm:w-28 md:w-32 object-contain drop-shadow-lg"
-            style={{ filter: 'drop-shadow(0 0 12px rgba(200,160,0,0.3))' }}
+            className="hero-brand-mark hero-college-mark"
           />
-        </div>
-
-        {/* ── ESPORTS CLUB LOGO ── */}
-        <div className="flex justify-center mb-4">
           <img
             src="/logos/esports-logo.png"
             alt="SIET Esports Club"
-            className="w-36 h-auto sm:w-44 md:w-52 object-contain drop-shadow-xl"
-            style={{ filter: 'drop-shadow(0 0 20px rgba(140,60,255,0.45))' }}
+            className="hero-brand-mark hero-esports-mark"
           />
         </div>
 

@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -18,13 +19,18 @@ if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 // Security
 app.use(helmet({ crossOriginEmbedderPolicy: false, contentSecurityPolicy: false }));
 
-// CORS — allow localhost + any Vercel deployment URL
+// CORS — allow explicit local development origins and configured deployments.
 app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (Postman, mobile apps, curl)
     if (!origin) return callback(null, true);
-    // Allow localhost dev
-    if (origin.includes('localhost')) return callback(null, true);
+    // Vite may bind either loopback hostname in development. Keep this list
+    // explicit rather than accepting arbitrary origins that contain a string.
+    const localDevelopmentOrigins = new Set([
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+    ]);
+    if (localDevelopmentOrigins.has(origin)) return callback(null, true);
     // Allow ALL vercel.app subdomains (covers preview + production URLs)
     if (origin.endsWith('.vercel.app')) return callback(null, true);
     // Allow custom domain if CLIENT_URL is set

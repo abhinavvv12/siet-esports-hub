@@ -3,10 +3,13 @@ import axios from 'axios';
 // Automatically use the right backend based on environment.
 // In development: Vite proxies /api → localhost:4000 (vite.config.ts proxy)
 // In production:  directly call the Render backend
-const isProd = import.meta.env.PROD; // true when built with `vite build`
-const baseURL = isProd
-  ? 'https://siet-esports-hub.onrender.com/api'
-  : '/api';
+// In development Vite proxies `/api` to the local backend. A separately
+// deployed frontend can set VITE_API_URL at build time (including `/api`).
+// The current endpoint remains a compatibility fallback for existing deploys.
+const configuredApiUrl = import.meta.env.VITE_API_URL?.trim().replace(/\/+$/, '');
+const baseURL = configuredApiUrl || (import.meta.env.DEV
+  ? '/api'
+  : 'https://siet-esports-hub.onrender.com/api');
 
 const api = axios.create({
   baseURL,

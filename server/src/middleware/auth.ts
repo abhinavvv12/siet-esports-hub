@@ -3,7 +3,11 @@ import jwt from 'jsonwebtoken';
 import { AuthRequest, JwtPayload, Role } from '../types';
 import { sendError } from '../utils';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'siet-esports-secret-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET must be configured before the API can start');
+}
 
 export const authenticate = (req: AuthRequest, res: Response, next: NextFunction) => {
   const token = req.cookies?.token || req.headers.authorization?.replace('Bearer ', '');

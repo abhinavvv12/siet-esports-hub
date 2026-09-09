@@ -66,6 +66,44 @@
   }
 }
 
+/* Hero branding: the supplied PNGs include non-transparent backgrounds.
+   Blend and feather their edges so they read as one environmental lockup. */
+.hero-brand-lockup {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.25rem, 1.6vw, 1rem);
+  margin: 0 auto 1rem;
+  min-height: clamp(7rem, 13vw, 10rem);
+}
+
+.hero-brand-mark {
+  display: block;
+  object-fit: contain;
+  mix-blend-mode: screen;
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 52%, rgba(0, 0, 0, 0.82) 67%, transparent 82%);
+  mask-image: radial-gradient(ellipse at center, #000 52%, rgba(0, 0, 0, 0.82) 67%, transparent 82%);
+}
+
+.hero-college-mark {
+  width: clamp(5.75rem, 10vw, 8rem);
+  opacity: 0.9;
+}
+
+.hero-esports-mark {
+  width: clamp(8.75rem, 16vw, 12.5rem);
+}
+
+@media (max-width: 420px) {
+  .hero-brand-lockup {
+    gap: 0;
+    margin-bottom: 0.75rem;
+  }
+
+  .hero-college-mark { width: 5.3rem; }
+  .hero-esports-mark { width: 9.4rem; }
+}
+
 @keyframes shimmer {
   from { background-position: -200% center; }
   to { background-position: 200% center; }

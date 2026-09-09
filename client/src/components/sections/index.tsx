@@ -450,7 +450,7 @@ export function AnnouncementsBar({ announcements }: { announcements: Announcemen
   if (!announcements.length) return null;
   const latest = announcements[0];
   return (
-    <div className="bg-indigo-600/10 border-y border-indigo-500/20 py-2.5">
+    <div className="mt-16 bg-indigo-600/10 border-y border-indigo-500/20 py-2.5">
       <div className="max-w-7xl mx-auto px-4 flex items-center gap-3">
         <span className="text-indigo-400 text-xs font-mono uppercase tracking-wider flex-shrink-0">📣 Latest</span>
         <span className="text-slate-300 text-sm truncate">{latest.title}: {latest.description}</span>
